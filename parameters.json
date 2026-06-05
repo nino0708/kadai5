@@ -4,10 +4,6 @@
     "ParameterValue": "aws-training"
   },
   {
-    "ParameterKey": "EC2KeyPairName",
-    "ParameterValue": "impress-keypair"
-  },
-  {
     "ParameterKey": "DBPassword",
     "ParameterValue": "YourPassword123!"
   },

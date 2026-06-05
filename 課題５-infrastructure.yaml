@@ -38,10 +38,6 @@ Parameters:
     Default: t3.micro
     AllowedValues: [t3.micro, t3.small, t3.medium]
 
-  EC2KeyPairName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: EC2接続用キーペア名
-
   AMIID:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
@@ -376,7 +372,6 @@ Resources:
       LaunchTemplateData:
         ImageId: !Ref AMIID
         InstanceType: !Ref EC2InstanceType
-        KeyName: !Ref EC2KeyPairName
         IamInstanceProfile:
           Arn: !GetAtt EC2InstanceProfile.Arn
         SecurityGroupIds:
@@ -743,46 +738,38 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
         - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores
 
-  # ----------------------------------------------------------
-  # EventBridge Rule（CloudFormationスタック操作の監視）
-  # ----------------------------------------------------------
-  CloudFormationEventRule:
+# ============================================================
+# EventBridgh
+# ============================================================
+  RdsFailoverEventRule:
     Type: AWS::Events::Rule
     Properties:
-      Name: !Sub ${ProjectName}-cfn-stack-changes
-      Description: CloudFormationスタックの作成・削除を検知してSNS通知
+      Description: Notify existing AlarmSNSTopic when Amazon RDS failover event is detected
       State: ENABLED
       EventPattern:
         source:
-          - aws.cloudformation
+          - aws.rds
         detail-type:
-          - CloudFormation Stack Status Change
+          - RDS DB Instance Event
+          - RDS DB Cluster Event
         detail:
-          status-details:
-            status:
-              - CREATE_COMPLETE
-              - CREATE_FAILED
-              - DELETE_COMPLETE
-              - DELETE_FAILED
-              - ROLLBACK_COMPLETE
+          EventCategories:
+            - failover
       Targets:
-        - Id: AlarmSNSTarget
+        - Id: RdsFailoverAlarmSNSTopicTarget
           Arn: !Ref AlarmSNSTopic
           InputTransformer:
             InputPathsMap:
-              stackName: '$.detail.stack-id'
-              status: '$.detail.status-details.status'
-              time: '$.time'
-              account: '$.account'
-            InputTemplate: |
-              "CloudFormationスタック変更通知"
-              "アカウント: <account>"
-              "時刻: <time>"
-              "スタック: <stackName>"
-              "ステータス: <status>"
+              account: $.account
+              region: $.region
+              time: $.time
+              sourceArn: $.detail.SourceArn
+              sourceId: $.detail.SourceIdentifier
+              eventId: $.detail.EventID
+              message: $.detail.Message
+            InputTemplate: '"RDS failover event detected.\nAccount: <account>\nRegion: <region>\nTime: <time>\nSourceArn: <sourceArn>\nSourceIdentifier: <sourceId>\nEventID: <eventId>\nMessage: <message>"'
 
-  # EventBridgeからSNSへのパブリッシュ許可
-  SNSTopicPolicyForEventBridge:
+  RdsFailoverAlarmSNSTopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
       Topics:
@@ -790,13 +777,12 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Sid: AllowEventBridgePublish
+          - Sid: AllowEventBridgePublishRdsFailover
             Effect: Allow
             Principal:
               Service: events.amazonaws.com
             Action: sns:Publish
             Resource: !Ref AlarmSNSTopic
-
 
 # ============================================================
 # Outputs
@@ -827,3 +813,11 @@ Outputs:
   SNSTopicARN:
     Description: アラーム通知SNS Topic ARN
     Value: !Ref AlarmSNSTopic
+
+
+
+
+
+
+
+
