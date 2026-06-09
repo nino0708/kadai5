@@ -755,10 +755,6 @@ Outputs:
     Description: RDSエンドポイント
     Value: !GetAtt RDSInstance.Endpoint.Address
 
-  AppS3BucketName:
-    Description: アプリ用S3バケット名
-    Value: !Ref AppS3Bucket
-
   CloudTrailBucketName:
     Description: CloudTrailログ保存S3バケット名
     Value: !Ref CloudTrailBucket
