@@ -1,3 +1,4 @@
+template-file-path: 課題5-infrastructure.yaml
 ProjectName: aws-training
 DBPassword: YourPassword123!
 EC2InstanceType: t3.micro
