@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   AWS実行環境 メインインフラ構成
   VPC / Subnets / IGW / NAT / ALB / EC2(ASG) / RDS Multi-AZ /
-  CloudWatch / SNS / CloudTrail / S3 / AWS Backup
+  CloudWatch / SNS / CloudTrail / S3
 
 # ============================================================
 # Parameters
@@ -690,30 +690,6 @@ Resources:
       IncludeGlobalServiceEvents: true
       EnableLogFileValidation: true
 
- 
-
-  # ----------------------------------------------------------
-  # AWS Backup
-  # ----------------------------------------------------------
-  BackupVault:
-    Type: AWS::Backup::BackupVault
-    Properties:
-      BackupVaultName: !Sub ${ProjectName}-vault
-
-  BackupRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub ${ProjectName}-backup-role
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: backup.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
-        - arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores
 
 # ============================================================
 # EventBridge
