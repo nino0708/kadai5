@@ -1,9 +1,10 @@
 template-file-path: 課題5-infrastructure.yaml
-ProjectName: aws-training
-DBPassword: YourPassword123!
-EC2InstanceType: t3.micro
-DBInstanceClass: db.t3.micro
-ASGMinSize: "2"
-ASGMaxSize: "4"
-ASGDesiredSize: "2"
-CPUScaleOutThreshold: "50"
+propaties:
+  ProjectName: aws-training
+  DBPassword: YourPassword123!
+  EC2InstanceType: t3.micro
+  DBInstanceClass: db.t3.micro
+  ASGMinSize: "2"
+  ASGMaxSize: "4"
+  ASGDesiredSize: "2"
+  CPUScaleOutThreshold: "50"
