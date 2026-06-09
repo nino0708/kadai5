@@ -10,7 +10,7 @@ Description: >
 Parameters:
   ProjectName:
     Type: String
-    Default: aws-training-kadai1
+    Default: aws-training-kadai5
     Description: リソース名のプレフィックス
 
   VpcCidr:
